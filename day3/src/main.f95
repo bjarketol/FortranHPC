@@ -8,6 +8,9 @@ interface
   real, dimension(:, :) :: f
   integer, optional :: step
   end subroutine
+  elemental subroutine copy(c, o)
+  real, intent(inout) :: c, o
+  end subroutine
 end interface
 
 nstop = 200

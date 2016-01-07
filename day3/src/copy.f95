@@ -1,8 +1,6 @@
-subroutine copy(copied, original)
+elemental subroutine copy(c, o)
 use master
 implicit none
-real, dimension(nx, ny) :: copied, original
-
-copied(:, :) = original(:, :)
-
+real, intent(inout) :: c, o
+c = o
 end subroutine copy
