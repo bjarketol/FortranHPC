@@ -11,14 +11,14 @@ BIN         = run.exe
 # COMPILER SETTINGS (Linux)
 #------------------------------------------------------------------------------
 FC          = gfortran
-FFLAGS      = -Wall -fcheck=all
+FFLAGS      = -fbacktrace -C -Wall -fcheck=all
 LD          = $(FC)
 LDFLAGS     = 
 LIBS        = 
 #------------------------------------------------------------------------------
 # BINARY DIRECTORY
 #------------------------------------------------------------------------------
-bindir      = /home/btol/Dropbox/HPC/code/day3/bin
+bindir      = ../bin
 
 #------------------------------------------------------------------------------
 # DEFAULT TARGET
@@ -32,6 +32,7 @@ OBJS = master.o \
 	   init.o \
        take_step.o \
        write_out.o \
+       diag.o \
        copy.o \
        alloc.o \
        main.o
@@ -39,12 +40,14 @@ OBJS = master.o \
 #------------------------------------------------------------------------------
 # DEPENDENCIES
 #------------------------------------------------------------------------------
-main.o: main.f95 alloc.f95 copy.f95 write_out.f95 take_step.f95 init.f95 master.f95
+main.o: main.f95 alloc.f95 copy.f95 write_out.f95 diag.f95 take_step.f95 init.f95 master.f95
 	$(FC) $(FFLAGS) -c main.f95
 copy.o: copy.f95 master.f95
 	$(FC) $(FFLAGS) -c copy.f95
 write_out.o: write_out.f95 master.f95
 	$(FC) $(FFLAGS) -c write_out.f95
+diag.o: master.f95
+	$(FC) $(FFLAGS) -c diag.f95
 take_step.o: take_step.f95 master.f95
 	$(FC) $(FFLAGS) -c take_step.f95
 init.o: init.f95 master.f95

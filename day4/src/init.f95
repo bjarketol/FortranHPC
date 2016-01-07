@@ -1,17 +1,11 @@
-subroutine init(c, n, m)
+subroutine init(array)
+use master
 implicit none
-real, dimension(:, :), intent(inout), allocatable :: c
-integer, intent(in) :: n, m
-
-if (.not.allocated(c)) then
-  allocate(c(n, m))
-endif
-
-c(:, :) = 0.0
-c(1, :) = 1.0
-c(n, :) = 1.0
-c(:, 1) = 1.0
-c(:, m) = 1.0
-
+real, dimension(nx, ny), intent(inout) :: array
+array(:, :)  = 0.0
+array(1, :)  = 1.0
+array(nx, :) = 1.0
+array(:, 1)  = 1.0
+array(:, ny) = 1.0
 end subroutine init
 
