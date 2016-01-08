@@ -15,6 +15,12 @@ FFLAGS      = -fbacktrace -C -Wall -fcheck=all
 LD          = $(FC)
 LDFLAGS     = 
 LIBS        = 
+
+#------------------------------------------------------------------------------
+# BINARY DIRECTORY
+#------------------------------------------------------------------------------
+namelist	= ../name.list
+
 #------------------------------------------------------------------------------
 # BINARY DIRECTORY
 #------------------------------------------------------------------------------
@@ -32,6 +38,8 @@ OBJS = master.o \
 	   init.o \
        take_step.o \
        write_out.o \
+       read_namelist.o \
+       write_restart.o \
        diag.o \
        copy.o \
        alloc.o \
@@ -40,27 +48,42 @@ OBJS = master.o \
 #------------------------------------------------------------------------------
 # DEPENDENCIES
 #------------------------------------------------------------------------------
-main.o: main.f95 alloc.f95 copy.f95 write_out.f95 diag.f95 take_step.f95 init.f95 master.f95
-	$(FC) $(FFLAGS) -c main.f95
-copy.o: copy.f95 master.f95
-	$(FC) $(FFLAGS) -c copy.f95
-write_out.o: write_out.f95 master.f95
-	$(FC) $(FFLAGS) -c write_out.f95
-diag.o: master.f95
-	$(FC) $(FFLAGS) -c diag.f95
-take_step.o: take_step.f95 master.f95
-	$(FC) $(FFLAGS) -c take_step.f95
-init.o: init.f95 master.f95
-	$(FC) $(FFLAGS) -c init.f95
-master.o: master.f95
-	$(FC) $(FFLAGS) -c master.f95
-alloc.o: alloc.f95
-	$(FC) $(FFLAGS) -c alloc.f95
+main.o: main.f90 \
+	alloc.f90 \
+	copy.f90 \
+	write_out.f90 \
+	read_namelist.f90 \
+	write_restart.f90 \
+	diag.f90 \
+	take_step.f90 \
+	init.f90 \
+	master.f90
+	$(FC) $(FFLAGS) -c main.f90
+copy.o: copy.f90 master.f90
+	$(FC) $(FFLAGS) -c copy.f90
+write_out.o: write_out.f90 master.f90
+	$(FC) $(FFLAGS) -c write_out.f90
+read_namelist.o: master.f90
+	$(FC) $(FFLAGS) -c read_namelist.f90
+write_restart.o: master.f90
+	$(FC) $(FFLAGS) -c write_restart.f90
+diag.o: master.f90
+	$(FC) $(FFLAGS) -c diag.f90
+take_step.o: take_step.f90 master.f90
+	$(FC) $(FFLAGS) -c take_step.f90
+init.o: init.f90 master.f90
+	$(FC) $(FFLAGS) -c init.f90
+master.o: master.f90
+	$(FC) $(FFLAGS) -c master.f90
+alloc.o: alloc.f90
+	$(FC) $(FFLAGS) -c alloc.f90
 
 #------------------------------------------------------------------------------
 # LINK
 #------------------------------------------------------------------------------
 $(TARGET): $(OBJS)
+	cp $(namelist) .
+	cp $(namelist) $(bindir)
 	$(LD) -o $(BIN) $(LDFLAGS) $(OBJS) $(LIBS)
 
 #------------------------------------------------------------------------------
@@ -82,7 +105,7 @@ clean:
 	rm *.exe
 	rm *.o
 	rm *.mod
-	rm $(bindir)/run.exe
-
+	rm name.list
+	rm ../diag.dat
 
 

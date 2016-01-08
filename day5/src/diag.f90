@@ -3,7 +3,7 @@ USE master
 IMPLICIT NONE
 INTEGER, SAVE :: naccum
 REAL, DIMENSION(10), SAVE :: bucket
-CHARACTER(LEN=*), PARAMETER :: outfile = "/home/btol/Dropbox/HPC/code/day4/diag.dat"
+CHARACTER(LEN=*), PARAMETER :: outfile = "/home/btol/Dropbox/HPC/code/day5/diag.dat"
 REAL :: val
 LOGICAL :: exists
 INTEGER :: i, stat
