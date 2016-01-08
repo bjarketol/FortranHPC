@@ -1,0 +1,18 @@
+PROGRAM main
+IMPLICIT NONE
+PROCEDURE (REAL) :: val
+
+PRINT*, "val(4) = ", val(4.0)
+
+END PROGRAM main
+
+FUNCTION val(x)
+IMPLICIT NONE
+REAL :: val
+REAL, INTENT(IN) :: x
+
+val = x + 2.3
+RETURN
+END FUNCTION val
+
+
