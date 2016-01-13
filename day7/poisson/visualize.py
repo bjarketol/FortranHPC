@@ -12,7 +12,7 @@ out_dir = os.path.join(cwd, "fig")
 
 for fname in os.listdir(src_dir):
 
-    name = fname[:-4]
+    name = fname[5:-4]
 
     infile = os.path.join(src_dir, fname)
 
@@ -30,7 +30,8 @@ for fname in os.listdir(src_dir):
     #plt.imshow(temp, interpolation="none", vmin=0.0, vmax = 1.0)
 
     # 2D CONTOUR PLOT
-    #plt.contourf(x, y, temp)
+    levels = np.linspace(0.0,20.0,101)
+    plt.contourf(x, y, temp, levels, cmap=cm.coolwarm, )
     
     # 3D WIRE PLOT
     #ax = fig.add_subplot(1, 1, 1, projection='3d')
@@ -38,13 +39,12 @@ for fname in os.listdir(src_dir):
     #ax.set_zlim3d(0.0, 1)
 
     #3D SURFACE PLOT
-    ax = fig.add_subplot(1, 1, 1, projection='3d')
-    surf = ax.plot_surface(x, y, temp, rstride=1, cstride=1, cmap=cm.coolwarm,
-                                   linewidth=0, antialiased=False)
-    ax.set_zlim3d(0.0, 1)
+    #ax = fig.add_subplot(1, 1, 1, projection='3d')
+    #surf = ax.plot_surface(x, y, temp, rstride=1, cstride=1, cmap=cm.coolwarm,
+    #                               linewidth=0, antialiased=False)
+    #ax.set_zlim3d(0.0, 20)
 
-
-    outfile = os.path.join(out_dir, name + ".png")
+    outfile = os.path.join(out_dir, name + ".jpg")
     plt.savefig(outfile)
     plt.clf()
     plt.close()
