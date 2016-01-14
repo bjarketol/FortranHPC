@@ -1,19 +1,19 @@
 &NAMDIM
-    nx = 5001
-    ny = 5001
+    nx = 15001
+    ny = 15001
     
     xmin = -1.0
     xmax = 1.0
     ymin = -1.0
     ymax = 1.0
     
-    jacobi       = .FALSE.
+    jacobi       = .TRUE.
     jacobi_OMP   = .TRUE.
     gauss_seidel = .FALSE.
 
-    converge = .FALSE.
+    converge = .TRUE.
     kmax     = 1.0d-5
-    nstop    = 200
+    nstop    = 20000000
     
     writeout = .FALSE.
     nwrt     = 200
