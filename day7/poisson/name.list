@@ -1,0 +1,20 @@
+&NAMDIM
+    nx = 2001
+    ny = 2001
+    
+    xmin = -1.0
+    xmax = 1.0
+    ymin = -1.0
+    ymax = 1.0
+    
+    jacobi       = .FALSE.
+    jacobi_OMP   = .TRUE.
+    gauss_seidel = .FALSE.
+
+    converge = .FALSE.
+    kmax     = 1.0d-5
+    nstop    = 200
+    
+    writeout = .FALSE.
+    nwrt     = 200
+&END

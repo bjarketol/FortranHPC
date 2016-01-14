@@ -1,0 +1,3 @@
+<event kind="cwarn" id="227">WARNING: Target `main.exe' is not instrumented for datarace detection;
+	reported datarace data may be misleading
+</event>
