@@ -5,7 +5,7 @@ USE OMP_LIB
 IMPLICIT NONE
 INTEGER :: it
 REAL*8, DIMENSION(:,:), POINTER :: temp, temp_old, force
-REAL*8 :: k
+REAL*8 :: d
 
 CALL read_namelist()
 
@@ -31,15 +31,15 @@ temp_old => temp_old_array
 force => force_array
 
 IF (converge) THEN
-    k = 1.0
+    d = 1.0
     it = 1
 
     ! JACOBI !
     IF (jacobi) THEN
-        DO WHILE (k.GT.kmax.AND.it.LE.nstop) 
+        DO WHILE (d.GT.eps.AND.it.LE.nstop) 
             CALL jacobi_step(temp, temp_old, force)
             CALL swap_pointer(temp, temp_old)
-            CALL frobnorm(k,temp,temp_old)
+            CALL frobnorm(d,temp,temp_old)
             IF (writeout.AND.MOD(it,nwrt).EQ.0) THEN
                 CALL write2txt(temp,it=it)
             ENDIF
@@ -49,11 +49,11 @@ IF (converge) THEN
     
     ! GAUSS-SEIDEL !
     IF (gauss_seidel) THEN
-        DO WHILE (k.GT.kmax.AND.it.LE.nstop) 
+        DO WHILE (d.GT.eps.AND.it.LE.nstop) 
             CALL copy_old()
             CALL gauss_seidel_step(temp, force)
             !CALL swap_pointer(temp, temp_old)
-            CALL frobnorm(k,temp,temp_old)
+            CALL frobnorm(d,temp,temp_old)
             IF (writeout.AND.MOD(it,nwrt).EQ.0) THEN
                 CALL write2txt(temp,it=it)
             ENDIF
@@ -95,7 +95,7 @@ CONTAINS
     SUBROUTINE read_namelist()
     IMPLICIT NONE
     CHARACTER(LEN=*), PARAMETER :: nlfile = "name.list"
-    NAMELIST /namdim/ nx,ny,nstop,nwrt,kmax,xmin,xmax,ymin,ymax,jacobi, &
+    NAMELIST /namdim/ nx,ny,nstop,nwrt,eps,xmin,xmax,ymin,ymax,jacobi, &
                       jacobi_OMP, gauss_seidel, converge, writeout
     OPEN(UNIT=10, FILE=nlfile)
     READ(10,namdim)

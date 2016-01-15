@@ -67,7 +67,7 @@ plt.ylabel("Speedup factor")
 plt.xlabel("Processors")
 plt.legend(loc="upper left")
 plt.tight_layout()
-plt.savefig("/home/btol/Desktop/fig.png")
+plt.savefig("/home/btol/Dropbox/HPC/reports/week2/scale.pdf")
 plt.show()
 
 
