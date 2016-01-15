@@ -1,6 +1,6 @@
 &NAMDIM
-    nx = 11
-    ny = 11
+    nx = 401
+    ny = 401
     
     xmin = -1.0
     xmax = 1.0
@@ -8,12 +8,12 @@
     ymax = 1.0
     
     jacobi       = .FALSE.
-    jacobi_OMP   = .TRUE.
-    gauss_seidel = .FALSE.
+    jacobi_OMP   = .FALSE.
+    gauss_seidel = .TRUE.
 
-    converge = .FALSE.
+    converge = .TRUE.
     kmax     = 1.0d-5
-    nstop    = 2000000
+    nstop    = 200000000
     
     writeout = .FALSE.
     nwrt     = 200
