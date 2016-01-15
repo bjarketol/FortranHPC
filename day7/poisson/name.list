@@ -1,6 +1,6 @@
 &NAMDIM
-    nx = 401
-    ny = 401
+    nx = 11
+    ny = 11
     
     xmin = -1.0
     xmax = 1.0

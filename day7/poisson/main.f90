@@ -16,10 +16,15 @@ CALL alloc(temp_array, nx, ny)
 CALL alloc(temp_old_array, nx, ny)
 CALL alloc(force_array, nx, ny)
 
-!$OMP PARALLEL
-CALL init_temp()
-CALL init_force()
-!$OMP END PARALLEL
+IF (jacobi_OMP) THEN
+    !$OMP PARALLEL
+    CALL init_temp_OMP()
+    CALL init_force_OMP()
+    !$OMP END PARALLEL
+ELSE
+    CALL init_temp()
+    CALL init_force()
+ENDIF
 
 temp => temp_array
 temp_old => temp_old_array
@@ -150,6 +155,15 @@ CONTAINS
     END SUBROUTINE copy_old
 
     SUBROUTINE init_temp()
+    temp_array(:,:)  = 0.0    
+    temp_array(:,ny) = 20.0 
+    temp_array(:,1)  = 0.0
+    temp_array(1,:)  = 20.0 
+    temp_array(nx,:) = 20.0
+    temp_old_array(:,:) = temp_array(:,:)
+    END SUBROUTINE init_temp
+    
+    SUBROUTINE init_temp_OMP()
     !$OMP WORKSHARE
     temp_array(:,:)  = 0.0    
     temp_array(:,ny) = 20.0 
@@ -158,9 +172,28 @@ CONTAINS
     temp_array(nx,:) = 20.0
     temp_old_array(:,:) = temp_array(:,:)
     !$OMP END WORKSHARE
-    END SUBROUTINE init_temp
+    END SUBROUTINE init_temp_OMP
 
     SUBROUTINE init_force()
+    IMPLICIT NONE
+    INTEGER :: i, j
+    REAL*8 :: x, y, delsq
+    delsq = dx*dx
+    force_array(:,:) = 0.0
+    DO j = 1,ny
+        y = ymin+REAL(j-1)*dy
+        DO i = 1,nx
+            x = xmin+REAL(i-1)*dx
+            IF (y.GE.-0.66.AND.y.LE.-0.33) THEN
+                IF (x.GE.0.0.AND.x.LE.0.33) THEN
+                    force_array(i,j) = 200.0 * delsq
+                ENDIF
+            ENDIF
+        ENDDO
+    ENDDO
+    END SUBROUTINE init_force
+    
+    SUBROUTINE init_force_OMP()
     IMPLICIT NONE
     INTEGER :: i, j
     REAL*8 :: x, y, delsq
@@ -181,7 +214,7 @@ CONTAINS
         ENDDO
     ENDDO
     !$OMP END DO
-    END SUBROUTINE init_force
+    END SUBROUTINE init_force_OMP
     
     SUBROUTINE jacobi_step(new, old, f)
     IMPLICIT NONE
