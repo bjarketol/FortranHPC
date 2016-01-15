@@ -89,7 +89,7 @@ ELSE
     !$OMP END PARALLEL
     ENDIF
 ENDIF
-PRINT*, it, "Iterations done..."
+!PRINT*, it, "Iterations done..."
 CONTAINS 
 
     SUBROUTINE read_namelist()
