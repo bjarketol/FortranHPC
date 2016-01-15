@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm out/*
+rm fig/*
 time ./main.exe
 python visualize.py
 

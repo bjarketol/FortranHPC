@@ -45,8 +45,9 @@ IF (converge) THEN
     ! GAUSS-SEIDEL !
     IF (gauss_seidel) THEN
         DO WHILE (k.GT.kmax.AND.it.LE.nstop) 
-            !CALL gauss_seidel_step(temp, temp_old, force)
-            CALL swap_pointer(temp, temp_old)
+            CALL copy_old()
+            CALL gauss_seidel_step(temp, force)
+            !CALL swap_pointer(temp, temp_old)
             CALL frobnorm(k,temp,temp_old)
             IF (writeout.AND.MOD(it,nwrt).EQ.0) THEN
                 CALL write2txt(temp,it=it)
@@ -83,27 +84,8 @@ ELSE
     !$OMP END PARALLEL
     ENDIF
 ENDIF
-
-CONTAINS
-    
-    SUBROUTINE jacobi_OMP_step(new, old, f)
-    IMPLICIT NONE
-    REAL*8, DIMENSION(:, :), POINTER, intent(inout) :: new, old
-    REAL*8, DIMENSION(:, :), POINTER :: f
-    INTEGER :: i
-    INTEGER :: j
-    !$OMP DO PRIVATE(i,j)
-    DO j = 2,ny-1
-        DO i = 2,nx-1
-            new(i,j) = 0.25*(old(i  ,j-1) + &
-                             old(i  ,j+1) + &
-                             old(i-1,j  ) + &
-                             old(i+1,j  ) + &
-                             f(i,j))
-        ENDDO
-    ENDDO
-    !$OMP END DO
-    END SUBROUTINE jacobi_OMP_step
+PRINT*, it, "Iterations done..."
+CONTAINS 
 
     SUBROUTINE read_namelist()
     IMPLICIT NONE
@@ -138,10 +120,11 @@ CONTAINS
     INTEGER :: i,j
     IF (PRESENT(it)) THEN
         
-        !WRITE(outfile, "(A,I6.6,A)") "/home/btol/Dropbox/HPC/code/day7/poisson/out/diff.",it,".dat"
-        WRITE(outfile, "(A,I6.6,A)") "/home/btol/projects/FortranHPC/day7/poisson/out/diff.",it,".dat"
+        WRITE(outfile, "(A,I6.6,A)") "/home/btol/Dropbox/HPC/code/day7/poisson/out/diff.",it,".dat"
+        !WRITE(outfile, "(A,I6.6,A)") "/home/btol/projects/FortranHPC/day7/poisson/out/diff.",it,".dat"
     ELSE
-        WRITE(outfile, "(A)") "/home/btol/projects/FortranHPC/day7/poisson/out/diff.dat"
+        WRITE(outfile, "(A,I6.6,A)") "/home/btol/Dropbox/HPC/code/day7/poisson/out/diff.dat"
+        !WRITE(outfile, "(A)") "/home/btol/projects/FortranHPC/day7/poisson/out/diff.dat"
     ENDIF
     OPEN(UNIT=20, FILE=outfile)
     DO j = 1, ny
@@ -160,6 +143,11 @@ CONTAINS
     p1 => p2
     p2 => p3
     END SUBROUTINE swap_pointer
+    
+    SUBROUTINE copy_old()
+    IMPLICIT NONE
+    temp_old_array(:,:) = temp_array(:,:)
+    END SUBROUTINE copy_old
 
     SUBROUTINE init_temp()
     !$OMP WORKSHARE
@@ -197,20 +185,11 @@ CONTAINS
     
     SUBROUTINE jacobi_step(new, old, f)
     IMPLICIT NONE
-    REAL*8, DIMENSION(:, :), POINTER, intent(inout) :: new, old
+    REAL*8, DIMENSION(:, :), POINTER, INTENT(INOUT) :: new, old
     REAL*8, DIMENSION(:, :), POINTER :: f
-    INTEGER :: i!, im, ip
-    INTEGER :: j!, jm, jp
+    INTEGER :: i,j
     DO j = 2,ny-1
-        !jm = j-1
-        !jp = j+1
-        !jm = MAX(1, j-1)
-        !jp = MIN(ny, j+1)
         DO i = 2,nx-1
-            !im = i-1
-            !ip = i+1
-            !im = MAX(1, i-1)
-            !ip = MIN(nx, i+1)
             new(i,j) = 0.25*(old(i,  j-1) + &
                              old(i,  j+1) + &
                              old(i-1,j  ) + &
@@ -219,5 +198,39 @@ CONTAINS
         ENDDO
     ENDDO
     END SUBROUTINE jacobi_step
+    
+    SUBROUTINE jacobi_OMP_step(new, old, f)
+    IMPLICIT NONE
+    REAL*8, DIMENSION(:, :), POINTER, INTENT(INOUT) :: new, old
+    REAL*8, DIMENSION(:, :), POINTER :: f
+    INTEGER :: i,j
+    !$OMP DO PRIVATE(i,j)
+    DO j = 2,ny-1
+        DO i = 2,nx-1
+            new(i,j) = 0.25*(old(i  ,j-1) + &
+                             old(i  ,j+1) + &
+                             old(i-1,j  ) + &
+                             old(i+1,j  ) + &
+                             f(i,j))
+        ENDDO
+    ENDDO
+    !$OMP END DO
+    END SUBROUTINE jacobi_OMP_step
+
+    SUBROUTINE gauss_seidel_step(new, f)
+    IMPLICIT NONE
+    REAL*8, DIMENSION(:, :), POINTER, INTENT(INOUT) :: new
+    REAL*8, DIMENSION(:, :), POINTER :: f
+    INTEGER :: i,j
+    DO j = 2,ny-1
+        DO i = 2,nx-1
+            new(i,j) = 0.25*(new(i  ,j-1) + &
+                             new(i  ,j+1) + &
+                             new(i-1,j  ) + &
+                             new(i+1,j  ) + &
+                             f(i,j))                        
+        ENDDO
+    ENDDO
+    END SUBROUTINE gauss_seidel_step
 
 END PROGRAM main
