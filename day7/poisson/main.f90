@@ -15,8 +15,11 @@ dy = (ymax-ymin)/(ny-1)
 CALL alloc(temp_array, nx, ny)
 CALL alloc(temp_old_array, nx, ny)
 CALL alloc(force_array, nx, ny)
+
+!$OMP PARALLEL
 CALL init_temp()
 CALL init_force()
+!$OMP END PARALLEL
 
 temp => temp_array
 temp_old => temp_old_array
@@ -134,9 +137,11 @@ CONTAINS
     CHARACTER(LEN=200) :: outfile
     INTEGER :: i,j
     IF (PRESENT(it)) THEN
-        WRITE(outfile, "(A,I6.6,A)") "/home/btol/Dropbox/HPC/code/day7/poisson/out/diff.",it,".dat"
+        
+        !WRITE(outfile, "(A,I6.6,A)") "/home/btol/Dropbox/HPC/code/day7/poisson/out/diff.",it,".dat"
+        WRITE(outfile, "(A,I6.6,A)") "/home/btol/projects/FortranHPC/day7/poisson/out/diff.",it,".dat"
     ELSE
-        WRITE(outfile, "(A)") "/home/btol/Dropbox/HPC/code/day7/poisson/out/diff.dat"
+        WRITE(outfile, "(A)") "/home/btol/projects/FortranHPC/day7/poisson/out/diff.dat"
     ENDIF
     OPEN(UNIT=20, FILE=outfile)
     DO j = 1, ny
@@ -157,12 +162,14 @@ CONTAINS
     END SUBROUTINE swap_pointer
 
     SUBROUTINE init_temp()
+    !$OMP WORKSHARE
     temp_array(:,:)  = 0.0    
     temp_array(:,ny) = 20.0 
     temp_array(:,1)  = 0.0
     temp_array(1,:)  = 20.0 
     temp_array(nx,:) = 20.0
     temp_old_array(:,:) = temp_array(:,:)
+    !$OMP END WORKSHARE
     END SUBROUTINE init_temp
 
     SUBROUTINE init_force()
@@ -170,7 +177,10 @@ CONTAINS
     INTEGER :: i, j
     REAL*8 :: x, y, delsq
     delsq = dx*dx
+    !$OMP WORKSHARE
     force_array(:,:) = 0.0
+    !$OMP END WORKSHARE
+    !$OMP DO PRIVATE(j,i,y,x)
     DO j = 1,ny
         y = ymin+REAL(j-1)*dy
         DO i = 1,nx
@@ -182,28 +192,29 @@ CONTAINS
             ENDIF
         ENDDO
     ENDDO
+    !$OMP END DO
     END SUBROUTINE init_force
     
     SUBROUTINE jacobi_step(new, old, f)
     IMPLICIT NONE
     REAL*8, DIMENSION(:, :), POINTER, intent(inout) :: new, old
     REAL*8, DIMENSION(:, :), POINTER :: f
-    INTEGER :: i, im, ip
-    INTEGER :: j, jm, jp
+    INTEGER :: i!, im, ip
+    INTEGER :: j!, jm, jp
     DO j = 2,ny-1
-        jm = j-1
-        jp = j+1
+        !jm = j-1
+        !jp = j+1
         !jm = MAX(1, j-1)
         !jp = MIN(ny, j+1)
         DO i = 2,nx-1
-            im = i-1
-            ip = i+1
+            !im = i-1
+            !ip = i+1
             !im = MAX(1, i-1)
             !ip = MIN(nx, i+1)
-            new(i,j) = 0.25*(old(i,jm) + &
-                             old(i,jp) + &
-                             old(im,j) + &
-                             old(ip,j) + &
+            new(i,j) = 0.25*(old(i,  j-1) + &
+                             old(i,  j+1) + &
+                             old(i-1,j  ) + &
+                             old(i+1,j  ) + &
                              f(i,j))
         ENDDO
     ENDDO
