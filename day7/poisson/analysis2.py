@@ -23,7 +23,7 @@ def read_result(infile):
 
 sns.set_context("talk", font_scale=1.9)
 
-resultdir = "/home/btol/Dropbox/HPC/code/day7/poisson/results/"
+resultdir = "/home/btol/Dropbox/HPC/code/day7/poisson/results3/"
 fig = plt.figure(figsize=(12,9)) 
 colors = sns.color_palette()
 
@@ -37,12 +37,9 @@ sizes = {"n31" : 0.022,
          "n5001" : 572.43349, 
          "n10001" : 2289.27615}
 
-items = ["6n31nstop20000.txt",
-         "9n81nstop20000.txt",
-         "0n101nstop200000_0.txt",
-         "2n2001nstop200_2.txt",
-         "5n10001nstop20_4.txt"]
-
+items = ["Optimized.txt",
+         "Unoptimized.txt"]
+tt = 24.78
 for ip, fname in enumerate(items):
 
 
@@ -58,7 +55,11 @@ for ip, fname in enumerate(items):
     f = popt[0]
 
     yl = amdahl(p,f)
+        
+    yy = tt/t
 
+    if ip == 0:
+        plt.plot(p,yy,"*",ms=20.0,alpha=0.7, label="%s relative to Unoptimized" % fname[:-4])
     plt.plot(p,yl,ls="--",lw=4.0,alpha=0.7,color=colors[ip])
     plt.plot(p,p,"k",lw=6.0)
     plt.plot(p,y,
@@ -66,18 +67,19 @@ for ip, fname in enumerate(items):
              color=colors[ip],
              alpha=0.7,
              ms=15.0,
-             label="N=%s (f = %.3f) [%.2f MB]" % (fname.split("nstop")[0].split("n")[1],f,sizes[fname.split("nstop")[0][1:]]))
-
+             label = "%s" % fname[:-4]
+             #label="N=%s (f = %.3f) [%.2f MB]" % (fname.split("nstop")[0].split("n")[1],f,sizes[fname.split("nstop")[0][1:]]))
+            )
     plt.xticks([1] + range(0,21,2))
-    plt.yticks([1] + range(0,21,2))
+    plt.yticks([1] + range(0,31,2))
     plt.xlim([0.5,20.5])
-    plt.ylim([0.5,20.5])
+    plt.ylim([0.5,30.5])
 
 plt.ylabel("Speedup factor")
 plt.xlabel("Processors")
 plt.legend(loc="upper left")
 plt.tight_layout()
-plt.savefig("/home/btol/Dropbox/HPC/reports/week2/scale.pdf")
+plt.savefig("/home/btol/Dropbox/HPC/reports/week2/optimize.pdf")
 plt.show()
 
 
