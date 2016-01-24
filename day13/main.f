@@ -12,14 +12,7 @@ CALL MPI_COMM_SIZE(MPI_COMM_WORLD, nproc, ierr)
 !~~~~~~~~~~~~~~~~~~ SET VARIABLES  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 
-nstop = 20000
-nx = 100 + 2
-ny = 100 + 2
-
-xmin = 0.0
-xmax = 1.0
-ymin = 0.0
-ymax = 1.0
+CALL read_namelist()
 
 dx = (xmax-xmin)/(nx-1)
 dy = (ymax-ymin)/(ny-1)
@@ -30,11 +23,11 @@ one_over_hsq = 1.0 / (dx*dy)
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ ALLOCATE AND INITIALIZE GLOBAL ARRAY ~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-ALLOCATE(u_global(nx,ny))
+ALLOCATE(u_global(ny,nx))
 
-DO j = 1, ny
-    DO i = 1,nx
-        u_global(i,j) = 0.0
+DO i = 1,nx
+    DO j = 1, ny
+        u_global(j,i) = 0.0
     ENDDO
 ENDDO
 
@@ -42,8 +35,8 @@ ENDDO
 !~~~~~~~~~~~~~~~~~~ SET MPI TOPO VARIABLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 ndims   = 2
-dims(1) = 2
-dims(2) = 2
+dims(1) = ndimi
+dims(2) = ndimj
 periods(1) = .FALSE.
 periods(2) = .FALSE.
 reorder    = .FALSE.
@@ -54,29 +47,6 @@ CALL MPI_COMM_RANK(comm_cart, rank_cart, ierr)
 CALL MPI_CART_COORDS(comm_cart, rank_cart, ndims, coords_cart, ierr)
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-!~~~~~~~~~~~~~~~~~~ FIND LOCAL DIM/VARS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-lnx = (nx-2)/2 + 2 
-lny = (ny-2)/2 + 2
-
-i_cart = coords_cart(1)
-j_cart = coords_cart(2)
-
-limin = 1
-limax = lnx
-
-ljmin = 1
-ljmax = lny
-
-gimin = 2 + i_cart * (lnx-2)
-gimax = gimin + (lnx-3) 
-
-gjmin = 2 + j_cart * (lny-2)
-gjmax = gjmin + (lny-3)
-
-!PRINT*, gimin, gimax, gjmin, gjmax
-
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ FIND IMEDIATE NEIGHBOURS AND GLOBAL BOUNDARIES ~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 
@@ -84,13 +54,83 @@ CALL MPI_CART_SHIFT(comm_cart,0,1,nghbr_top,nghbr_bottom,ierr)
 CALL MPI_CART_SHIFT(comm_cart,1,1,nghbr_left,nghbr_right,ierr)
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+!~~~~~~~~~~~~~~~~~~ FIND LOCAL DIM/VARS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+
+lpnx = nx / dims(2)
+lpny = ny / dims(1)
+
+lnx = lpnx
+lny = lpny
+
+IF (nghbr_left.NE.MPI_PROC_NULL) THEN
+    lnx = lnx + 1
+ENDIF
+
+IF (nghbr_right.NE.MPI_PROC_NULL) THEN
+    lnx = lnx + 1
+ENDIF
+
+IF (nghbr_bottom.NE.MPI_PROC_NULL) THEN
+    lny = lny + 1
+ENDIF
+
+IF (nghbr_top.NE.MPI_PROC_NULL) THEN
+    lny = lny + 1
+ENDIF
+
+i_cart = coords_cart(2)
+j_cart = coords_cart(1)
+
+limin = 1
+limax = lnx
+
+ljmin = 1
+ljmax = lny
+
+IF (nghbr_left.NE.MPI_PROC_NULL) THEN
+    lpimin = 2
+ELSE
+    lpimin = 1
+ENDIF
+
+IF (nghbr_right.NE.MPI_PROC_NULL) THEN
+    lpimax = lnx - 1
+ELSE
+    lpimax = lnx
+ENDIF
+
+IF (nghbr_bottom.NE.MPI_PROC_NULL) THEN
+    lpjmin = 2
+ELSE
+    lpjmin = 1
+ENDIF
+
+IF (nghbr_top.NE.MPI_PROC_NULL) THEN
+    lpjmax = lny - 1
+ELSE 
+    lpjmax = lny
+ENDIF
+
+gimin = 1 + i_cart*lpnx
+gimax = gimin - 1 + lpnx
+
+gjmin = 1 + j_cart*lpny
+gjmax = gjmin - 1 + lpny
+
+
+!PRINT*, rank, limin, limax, ljmin, ljmax
+!PRINT*, rank, lpimin, lpimax, lpjmin, lpjmax
+!PRINT*, rank, gimin, gimax, gjmin, gjmax
+
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ ALLOCATE AND INITIALIZE LOCAL ARRAY ~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 
-ALLOCATE(u(lnx,lny))
-DO j = 1,lny
-    DO i = 1,lnx
-        u(i,j) = 0.0
+ALLOCATE(u(lny,lnx))
+DO i = 1,lnx
+    DO j = 1,lny
+        u(j,i) = 0.0
     ENDDO
 ENDDO
 
@@ -98,10 +138,10 @@ ENDDO
 !~~~~~~~~~~~~~~~~~~ ALLOCATE GHOST ARRAYS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 
-ALLOCATE(ghst_top(lny-2))
-ALLOCATE(ghst_bottom(lny-2))
-ALLOCATE(ghst_left(lnx-2))
-ALLOCATE(ghst_right(lnx-2))
+ALLOCATE(ghst_top(lpny))
+ALLOCATE(ghst_bottom(lpny))
+ALLOCATE(ghst_left(lpnx))
+ALLOCATE(ghst_right(lpnx))
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ ALLOCATE AND INITIALIZE LOCAL ARRAY ~~~~~~~~~~~~~~~~~~~~~~~!
@@ -117,9 +157,9 @@ DO WHILE (resi.GT.0.01.AND.it.LT.nstop)
     !ENDIF
 ENDDO 
 
-DO j = 2,lny-1
-    DO i = 2,lnx-1
-        u_global(gimin+(i-2),gjmin+(j-2)) = u(i,j)
+DO i = 2,lnx-1
+    DO j = 2,lny-1
+        u_global(gjmin+(j-2),gimin+(i-2)) = u(j,i)
     ENDDO
 ENDDO
 

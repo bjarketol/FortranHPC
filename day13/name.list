@@ -1,0 +1,11 @@
+&NAMDIM
+  nx = 60
+  ny = 60
+  nstop = 2000
+  xmin = 0.0
+  xmax = 1.0
+  ymin = 0.0
+  ymax = 1.0
+  ndimi = 2
+  ndimj = 2
+&END
