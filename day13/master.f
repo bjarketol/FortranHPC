@@ -31,5 +31,6 @@ INTEGER :: nghbr_top, nghbr_bottom, nghbr_left, nghbr_right
 INTEGER :: ndimi, ndimj
 
 LOGICAL :: periods(2), reorder
+LOGICAL :: write_out
 
 END MODULE master

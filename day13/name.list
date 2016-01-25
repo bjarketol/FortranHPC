@@ -1,12 +1,13 @@
 &NAMDIM
-  nx = 600
-  ny = 600
-  nstop = 20
+  nx = 5000
+  ny = 5000
+  nstop = 2
   resi_limit = 0.000000000001
   xmin = 0.0
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
-  ndimi = 1
-  ndimj = 1
+  ndimi = 2
+  ndimj = 2
+  write_out = .FALSE.
 &END
