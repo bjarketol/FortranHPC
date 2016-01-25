@@ -138,14 +138,14 @@ ALLOCATE(ghst_bottom(lpny))
 ALLOCATE(ghst_left(lpnx))
 ALLOCATE(ghst_right(lpnx))
 
-PRINT*, rank, "coord", i_cart, j_cart
-PRINT*, rank, "size", SIZE(u,1), size(u,2)
-PRINT*, rank, "loc index", limin, limax, ljmin, ljmax
-PRINT*, rank, "locp index", lpimin, lpimax, lpjmin, lpjmax
-PRINT*, rank, "glob index", gimin, gimax, gjmin, gjmax
-PRINT*, rank, "1/hsq, dx,dy", one_over_hsq, dx, dy
-PRINT*, rank, "lpnx,lpny", lpnx, lpny
-PRINT*, rank, "lnx,lny", lnx, lny
+!PRINT*, rank, "coord", i_cart, j_cart
+!PRINT*, rank, "size", SIZE(u,1), size(u,2)
+!PRINT*, rank, "loc index", limin, limax, ljmin, ljmax
+!PRINT*, rank, "locp index", lpimin, lpimax, lpjmin, lpjmax
+!PRINT*, rank, "glob index", gimin, gimax, gjmin, gjmax
+!PRINT*, rank, "1/hsq, dx,dy", one_over_hsq, dx, dy
+!PRINT*, rank, "lpnx,lpny", lpnx, lpny
+!PRINT*, rank, "lnx,lny", lnx, lny
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ ALLOCATE AND INITIALIZE LOCAL ARRAY ~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
@@ -168,7 +168,7 @@ ENDDO
 !ENDDO
 
 CALL write2txt()
-PRINT*, resi
+!PRINT*, resi
 
 CALL MPI_FINALIZE(ierr)
 END PROGRAM main
