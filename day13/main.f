@@ -35,8 +35,8 @@ ENDDO
 !~~~~~~~~~~~~~~~~~~ SET MPI TOPO VARIABLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 ndims   = 2
-dims(1) = ndimi
-dims(2) = ndimj
+dims(1) = ndimj
+dims(2) = ndimi
 periods(1) = .FALSE.
 periods(2) = .FALSE.
 reorder    = .FALSE.
@@ -118,11 +118,6 @@ gimax = gimin - 1 + lpnx
 gjmin = 1 + j_cart*lpny
 gjmax = gjmin - 1 + lpny
 
-
-!PRINT*, rank, limin, limax, ljmin, ljmax
-!PRINT*, rank, lpimin, lpimax, lpjmin, lpjmax
-!PRINT*, rank, gimin, gimax, gjmin, gjmax
-
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ ALLOCATE AND INITIALIZE LOCAL ARRAY ~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
@@ -143,28 +138,37 @@ ALLOCATE(ghst_bottom(lpny))
 ALLOCATE(ghst_left(lpnx))
 ALLOCATE(ghst_right(lpnx))
 
+PRINT*, rank, "coord", i_cart, j_cart
+PRINT*, rank, "size", SIZE(u,1), size(u,2)
+PRINT*, rank, "loc index", limin, limax, ljmin, ljmax
+PRINT*, rank, "locp index", lpimin, lpimax, lpjmin, lpjmax
+PRINT*, rank, "glob index", gimin, gimax, gjmin, gjmax
+PRINT*, rank, "1/hsq, dx,dy", one_over_hsq, dx, dy
+PRINT*, rank, "lpnx,lpny", lpnx, lpny
+PRINT*, rank, "lnx,lny", lnx, lny
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~ ALLOCATE AND INITIALIZE LOCAL ARRAY ~~~~~~~~~~~~~~~~~~~~~~~!
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
-
-resi = 10000.0
-DO WHILE (resi.GT.0.01.AND.it.LT.nstop)
+resi = resi_limit + 1.0
+it = 0
+DO WHILE (resi.GT.resi_limit.AND.it.LT.nstop)
     CALL rb_gs()
     CALL comm()
-    CALL residual
-    !IF (rank.eq.0.and.mod(it,100).eq.0) THEN
+    CALL residual()
+    !IF (rank.eq.0.and.mod(it,10).eq.0) THEN
     !    PRINT*, resi
     !ENDIF
+    it = it + 1
 ENDDO 
 
-DO i = 2,lnx-1
-    DO j = 2,lny-1
-        u_global(gjmin+(j-2),gimin+(i-2)) = u(j,i)
-    ENDDO
-ENDDO
+!DO i = 2,lnx-1
+!    DO j = 2,lny-1
+!        u_global(gjmin+(j-2),gimin+(i-2)) = u(j,i)
+!    ENDDO
+!ENDDO
 
 CALL write2txt()
-
+PRINT*, resi
 
 CALL MPI_FINALIZE(ierr)
 END PROGRAM main

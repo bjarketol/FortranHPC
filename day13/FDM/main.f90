@@ -28,8 +28,8 @@
        ndim=2
        period(1) = .false.
        period(2) = .false.
-       dims(1) = 2
-       dims(2) = 2
+       dims(1) = 1
+       dims(2) = 3
        
        
        !Local dimension without ghost nodes

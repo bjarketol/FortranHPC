@@ -1,7 +1,7 @@
        module mod_data
        
-       !include 'mpif.h'
-       use mpi
+       include 'mpif.h'
+       !use mpi
        
        
        ! Global variables
