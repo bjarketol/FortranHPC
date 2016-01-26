@@ -16,7 +16,7 @@
        call MPI_COMM_SIZE(MPI_COMM_WORLD, nproc, ierror)
        call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
        
-       N = 10
+       N = 10000
 	    
        Nx = N
        Ny = N
@@ -28,8 +28,8 @@
        ndim=2
        period(1) = .false.
        period(2) = .false.
-       dims(1) = 1
-       dims(2) = 3
+       dims(1) = 2
+       dims(2) = 2
        
        
        !Local dimension without ghost nodes

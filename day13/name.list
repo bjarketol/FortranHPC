@@ -9,4 +9,7 @@
   ymax = 1.0
   ndimi = 3
   ndimj = 3
+  ndimi = 2
+  ndimj = 2
+  write_out = .FALSE.
 &END
