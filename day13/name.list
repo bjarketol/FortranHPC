@@ -1,12 +1,12 @@
 &NAMDIM
-  nx = 80
-  ny = 80
-  nstop = 20000
-  resi_limit = 0.01
+  nx = 400
+  ny = 400
+  nstop = 2000
+  resi_limit = 0.000000001
   xmin = 0.0
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
-  ndimi = 2
+  ndimi = 3
   ndimj = 3
 &END
