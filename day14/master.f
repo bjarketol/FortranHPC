@@ -54,6 +54,7 @@ CONTAINS
         PRINT*, iccr, jccr
         PRINT*, icr, jcr
         PRINT*, C(jcr, icr)
+        !PRINT*, C(23:25, 23:25)
     ENDIF
 
     END SUBROUTINE print_ji_result
@@ -174,7 +175,6 @@ CONTAINS
     DO stage=0,q-1
 
         bcast_root = MOD(jcoord+stage, q)
-         
         IF (bcast_root.EQ.icoord) THEN
             CALL MPI_BCAST(ASELF,lni*lnj,MPI_REAL,bcast_root, & 
                            comm_row,ierr)
@@ -184,8 +184,8 @@ CONTAINS
             CALL multiply_local(A,B,C)
         ENDIF 
         CALL MPI_SENDRECV_REPLACE(B,lni*lnj,MPI_REAL,             &
-                                  neigh_right,0,              &
-                                  neigh_left,0,               &
+                                  neigh_left,0,              &
+                                  neigh_right,0,               &
                                   comm_col,STATUS,ierr)
     ENDDO
 
@@ -195,13 +195,19 @@ CONTAINS
     REAL, DIMENSION(:,:), INTENT(IN) :: AA,BB
     REAL, DIMENSION(:,:), INTENT(OUT) :: CC
     REAL :: CL
-    INTEGER :: row, column, N
+    INTEGER :: row, col, N
     CL = 0.0
     N = SIZE(A,1)
     DO row=1,N
-        DO column=1,N
-            CL = SUM(AA(column,:)*BB(:,row))
-            CC(column,row) = CC(column,row) + CL
+        DO col=1,N
+            CL = SUM(AA(col,:)*BB(:,row))
+            CC(col,row) = CC(col,row) + CL
+
+            !IF (rank .eq. 15 .and. row .eq. 24 .and. col .eq. 25) THEN
+            !    PRINT*, "AA",AA(col,:)
+            !    PRINT*, "BB",BB(:,row)
+            !    PRINT*, "CL",CL
+            !ENDIF
         ENDDO
     ENDDO
     END SUBROUTINE multiply_local
