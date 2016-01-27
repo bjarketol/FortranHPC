@@ -1,6 +1,8 @@
 #!/bin/bash
 
 ./clean.sh
-./compile.sh
+#./compile.sh
+./pompile.sh
 ./run.sh
+
 

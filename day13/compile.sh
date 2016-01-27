@@ -1,5 +1,4 @@
 #!/bin/bash
-OPTIMIZATION=
 mpif90 $OPTIMIZATION -Wall -ffree-form -c master.f
 mpif90 $OPTIMIZATION -Wall -ffree-form -c read_nl.f
 mpif90 $OPTIMIZATION -Wall -ffree-form -c write2txt.f
