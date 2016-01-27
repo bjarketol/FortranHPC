@@ -22,7 +22,7 @@ n = 100
 ni = n
 nj = n
 
-q = 2
+q = 4
 
 ! MPI
 ndims      = 2

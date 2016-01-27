@@ -1,5 +1,5 @@
 MODULE master
-USE random
+!USE random
 IMPLICIT NONE
 INCLUDE "mpif.h"
 
@@ -91,25 +91,25 @@ CONTAINS
 
     END SUBROUTINE generate_sub_matrix_cos
 
-    SUBROUTINE generate_sub_matrix_random()
-    CALL init_random_seed()       
-    CALL RANDOM_NUMBER(ABIG)
-    CALL RANDOM_NUMBER(BBIG)
-    
-    ! INIT LOCAL A AND B
-    DO i = 1,lni
-        DO j = 1,lnj
-            ASELF(j,i) = ABIG(gjmin+(j-1),gimin+(i-1))
-            BSELF(j,i) = BBIG(gjmin+(j-1),gimin+(i-1))
-        ENDDO
-    ENDDO
+    !SUBROUTINE generate_sub_matrix_random()
+    !CALL init_random_seed()       
+    !CALL RANDOM_NUMBER(ABIG)
+    !CALL RANDOM_NUMBER(BBIG)
+    !
+    !! INIT LOCAL A AND B
+    !DO i = 1,lni
+    !    DO j = 1,lnj
+    !        ASELF(j,i) = ABIG(gjmin+(j-1),gimin+(i-1))
+    !        BSELF(j,i) = BBIG(gjmin+(j-1),gimin+(i-1))
+    !    ENDDO
+    !ENDDO
 
-    ! INIT TEMP A,B,C
-    A(:,:) = ASELF(:,:)
-    B(:,:) = BSELF(:,:)
-    C(:,:) = 0.0
+    !! INIT TEMP A,B,C
+    !A(:,:) = ASELF(:,:)
+    !B(:,:) = BSELF(:,:)
+    !C(:,:) = 0.0
 
-    END SUBROUTINE generate_sub_matrix_random
+    !END SUBROUTINE generate_sub_matrix_random
 
     SUBROUTINE initialize()
 
